@@ -1,0 +1,50 @@
+name: Feature request
+description: Идея или улучшение
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо за идею! Опишите сценарий использования — почему это важно
+        и как понять, что улучшение получилось.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую задачу решаем
+      description: Что сейчас неудобно или отсутствует.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предложение
+      description: Как это могло бы работать.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы
+      description: Что ещё рассматривали, чем пользуетесь сейчас.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Область
+      options:
+        - Распознавание (ASR, модель)
+        - Вставка и буфер обмена
+        - Горячая клавиша
+        - Интерфейс и оверлей
+        - Постобработка и словарь
+        - Пакет/установка
+        - Документация
+        - Другое
+    validations:
+      required: false

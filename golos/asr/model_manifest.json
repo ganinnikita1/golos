@@ -1,0 +1,105 @@
+{
+  "_comment": "Сгенерировано tools/gen_model_manifest.py. Не редактировать вручную.",
+  "schema": 1,
+  "repo": "ai-sage/GigaAM-v3",
+  "variants": {
+    "e2e_rnnt": {
+      "repo": "ai-sage/GigaAM-v3",
+      "commit": "7655ad717f8122257385bb4b2f373db3697e8680",
+      "files": {
+        "config.json": {
+          "sha256": "02361ba9cafd6c3ec66fcdd73494c3b562a60eb2a2d1b13f3cb04ae440d93e52",
+          "size": 1867
+        },
+        "modeling_gigaam.py": {
+          "sha256": "269be43b635b1e510115baa2a843c5cbaa052e8adf0be30dc133a2ba5b5f2d86",
+          "size": 49135
+        },
+        "pytorch_model.bin": {
+          "sha256": "afc6dcbae8320ea56f2cddebc0f13fbf62c9d59b6ddcad899782623c8610826a",
+          "size": 448928167
+        },
+        "tokenizer.model": {
+          "sha256": "828c12c991019eef952a960661f25a92d6ad279591e2ea466b4aeddf1d20a18a",
+          "size": 255336
+        }
+      }
+    },
+    "e2e_ctc": {
+      "repo": "ai-sage/GigaAM-v3",
+      "commit": "cec030b4c4f35d928e4a9044a3bdb29ebd499fac",
+      "files": {
+        "config.json": {
+          "sha256": "3dbcd2ebe1a572cb9a9945eeb3faf8b59180d408e61a61ecda44db30421e7251",
+          "size": 1623
+        },
+        "modeling_gigaam.py": {
+          "sha256": "269be43b635b1e510115baa2a843c5cbaa052e8adf0be30dc133a2ba5b5f2d86",
+          "size": 49135
+        },
+        "pytorch_model.bin": {
+          "sha256": "9801f83ef3979779982c4f83ec1c234d7571e8c1a5aa2bfc0b09ceb97a16cd75",
+          "size": 442405251
+        },
+        "tokenizer.model": {
+          "sha256": "0b9a1960898fbfdf5424ab852ea17445eb3da960fba23e977ff100eb0054fbc8",
+          "size": 240941
+        }
+      }
+    },
+    "ctc": {
+      "repo": "ai-sage/GigaAM-v3",
+      "commit": "15ef3b5a88da78f93134b3cb7f015c70aefa8946",
+      "files": {
+        "config.json": {
+          "sha256": "5db9b9e3f8c1a6193f3e262857cbaa75f4fd7653990de846162ad7318f61bdb5",
+          "size": 2117
+        },
+        "modeling_gigaam.py": {
+          "sha256": "269be43b635b1e510115baa2a843c5cbaa052e8adf0be30dc133a2ba5b5f2d86",
+          "size": 49135
+        },
+        "pytorch_model.bin": {
+          "sha256": "64d9c925df4bfd57e19f7b26d001106f9c5a35bd088a71c5bde071bf92c4a559",
+          "size": 441719299
+        }
+      }
+    },
+    "rnnt": {
+      "repo": "ai-sage/GigaAM-v3",
+      "commit": "c7f128b8accdd9624df905e5c2d7b7a48c27c0d8",
+      "files": {
+        "config.json": {
+          "sha256": "ca2998f00f064648988111c426deaa4c8bc86872a8bbe443598f2b1511dc0947",
+          "size": 2358
+        },
+        "modeling_gigaam.py": {
+          "sha256": "269be43b635b1e510115baa2a843c5cbaa052e8adf0be30dc133a2ba5b5f2d86",
+          "size": 49135
+        },
+        "pytorch_model.bin": {
+          "sha256": "a89b662052ad2b8129b334ab45c171b04fc6699d69bd6917575013ff79172ec2",
+          "size": 446387239
+        }
+      }
+    },
+    "ssl": {
+      "repo": "ai-sage/GigaAM-v3",
+      "commit": "343e30c65f5179325848dc5424d62e102e4753af",
+      "files": {
+        "config.json": {
+          "sha256": "92da40c48ce6c1f500736039c464bd9f127b267aa6335ea73bec24284e262dd6",
+          "size": 1260
+        },
+        "modeling_gigaam.py": {
+          "sha256": "269be43b635b1e510115baa2a843c5cbaa052e8adf0be30dc133a2ba5b5f2d86",
+          "size": 49135
+        },
+        "pytorch_model.bin": {
+          "sha256": "de3d165fdcde8cc5a5091e5dcc948dca9f6e7723ccbc2285662a68c1d151f9b0",
+          "size": 441613947
+        }
+      }
+    }
+  }
+}

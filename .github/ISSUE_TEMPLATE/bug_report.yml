@@ -1,0 +1,88 @@
+name: Bug report
+description: Ошибка в работе приложения, сборке или распознавания
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо за отчёт! Пожалуйста, не прикладывайте персональные записи,
+        API-ключи и приватные тексты. Фрагмент лога — `%APPDATA%\Golos\logs\golos.log`.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Что произошло
+      description: Опишите поведение и что ожидали увидеть.
+      placeholder: Нажал Ctrl+Alt+Space, оверлей появился, но текст не вставился в поле.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги воспроизведения
+      placeholder: |
+        1. Открыть ...
+        2. Нажать ...
+        3. Увидеть ...
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Версия приложения
+      description: Указана в настройках → «О программе» или в логе при старте.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: Как запускаете
+      options:
+        - Собранный exe (packaging/install.ps1)
+        - Из исходников (run.ps1)
+        - Портативный каталог dist\Golos
+    validations:
+      required: true
+
+  - type: input
+    id: windows
+    attributes:
+      label: Версия Windows
+      placeholder: Windows 11 24H2 (26100)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Движок распознавания
+      options:
+        - GigaAM-v3 (по умолчанию)
+        - faster-whisper
+        - Облачный ASR
+    validations:
+      required: false
+
+  - type: dropdown
+    id: insertion
+    attributes:
+      label: Способ вставки
+      options:
+        - Без буфера обмена (по умолчанию)
+        - Через буфер обмена
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Лог / диагностика
+      description: Вставьте последние строки лога (`Golos.exe --diagnose` тоже подойдёт). Замаскируйте личные данные.
+      render: text
+    validations:
+      required: false

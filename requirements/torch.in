@@ -1,0 +1,6 @@
+# CPU-сборка torch/torchaudio ставится ТОЛЬКО с индекса PyTorch.
+# torch.lock (с хешами) генерируется отдельно от pypi.lock, потому что
+# индекс другой; см. README-lock.md.
+--index-url https://download.pytorch.org/whl/cpu
+torch==2.8.0
+torchaudio==2.8.0

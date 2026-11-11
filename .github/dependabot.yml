@@ -1,0 +1,44 @@
+version: 2
+
+# Обновления зависимостей: Dependabot открывает PR с новыми версиями.
+# Security-обновления (CVE) включаются не этим файлом, а настройкой репозитория
+# "Dependabot security updates" (см. github-hardening.ps1) + alerts.
+#
+# PR-ы Dependabot запускают CI в контексте pull_request: GITHUB_TOKEN read-only,
+# секретов в workflow нет. Мерж — только через защищённый main.
+updates:
+  # --- Python-зависимости (pyproject.toml) ---
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # Один PR на все minor/patch, чтобы не плодить шум
+      python-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  # --- GitHub Actions (в workflow actions закреплены по полному SHA) ---
+  # Dependabot понимает SHA-пины с комментарием версии и обновляет и то, и другое.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "ci"]
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      gh-actions:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]

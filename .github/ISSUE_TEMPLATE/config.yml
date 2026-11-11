@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Вопросы и обсуждения
+    url: https://github.com/ganinnikita1/golos/discussions
+    about: Если это не баг и не идея, а вопрос — начните с обсуждения.
+  - name: Сообщить об уязвимости
+    url: https://github.com/ganinnikita1/golos/security/advisories/new
+    about: Не создавайте публичный issue для проблем безопасности.

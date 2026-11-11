@@ -1,0 +1,54 @@
+# окружение / данные разработки
+.venv/
+.devdata/
+.pip-cache/
+.tmp/
+bench/
+pytest-of-*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# временные каталоги тестов и smoke-прогонов
+tmp*/
+golos-e2e-*/
+golos-hk-*/
+golos-smoke-*/
+_data/
+hook_cross.txt
+test_out.txt
+
+# модели и большие бинари
+*.bin
+*.onnx
+*.gguf
+
+# секреты и локальные креды — на всякий случай, чтобы не закоммитить случайно
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.credentials
+.credentials*
+secrets/
+secret.*
+
+# сгенерированные артефакты
+*.wav
+!tests/fixtures/ru_tts/*.wav
+docs/_build/
+*.log
+
+# ОС
+Thumbs.db
+Desktop.ini
+.DS_Store

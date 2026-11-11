@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "golos-dictation"
+version = "0.1.1"
+description = "«Голос» — офлайн-диктовка для Windows на GigaAM-v3 (русский язык)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Golos" }]
+keywords = ["dictation", "speech-to-text", "asr", "russian", "windows", "gigaam"]
+dependencies = [
+    "torch>=2.4",
+    "torchaudio>=2.4",
+    "transformers>=4.50,<5",
+    "sentencepiece",
+    "huggingface_hub",
+    "hydra-core",
+    "omegaconf",
+    "sounddevice>=0.4.6",
+    "soundfile",
+    "numpy>=1.26",
+    "PySide6-Essentials>=6.6",
+    "Pillow",
+    "psutil",
+]
+
+[project.optional-dependencies]
+whisper = ["faster-whisper>=1.0"]
+dev = ["pytest>=8", "pyinstaller>=6.0", "psutil"]
+
+[project.scripts]
+golos = "golos.app:main"
+golos-cli = "golos.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "." }
+
+[tool.setuptools.packages.find]
+include = ["golos*"]
+
+[tool.setuptools.package-data]
+golos = ["assets/*", "assets/**/*", "asr/model_manifest.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -m 'not slow'"
+markers = [
+    "slow: требует загруженную модель/долгие вычисления",
+    "gui: требует графическую сессию",
+    "win32: использует реальные Win32-вызовы",
+]
