@@ -17,6 +17,7 @@ param(
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $python = Join-Path $root ".venv\Scripts\python.exe"
+if (-not (Test-Path $python)) { $python = "python" }  # CI/release: системный Python
 $dist = Join-Path $root "dist\Golos"
 $exe = Join-Path $dist "Golos.exe"
 
@@ -42,6 +43,17 @@ try {
 }
 
 if (-not (Test-Path $exe)) { throw "Сборка не дала exe: $exe" }
+
+# --- Гигиена бандла: в релиз не должны попасть пути сборочной машины ----------
+# PyInstaller может затянуть служебные __pycache__/dist-info из site-packages,
+# где зашит абсолютный путь сборки с именем пользователя (утечка PII в релизе).
+Get-ChildItem -Path $dist -Recurse -Directory -Filter "__pycache__" -ErrorAction SilentlyContinue |
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+$verify = Join-Path $root "packaging\verify_bundle.py"
+if (Test-Path $verify) {
+    & $python $verify $dist
+    if ($LASTEXITCODE -ne 0) { throw "Бандл содержит пути сборочной машины — публиковать нельзя" }
+}
 
 $sizeMb = [math]::Round(((Get-ChildItem $dist -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
 Write-Host ("Готово: {0} ({1} МБ)" -f $exe, $sizeMb) -ForegroundColor Green

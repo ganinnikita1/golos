@@ -13,7 +13,7 @@ name: CI
 #
 # ВАЖНО: для fork-PR GitHub берёт определение workflow из merge-коммита PR,
 # поэтому PR может менять сам CI. Поэтому в настройках репозитория нужно включить
-# "Require approval for all outside collaborators" (см. github-hardening.ps1),
+# "Require approval for all outside collaborators" (настройка репозитория),
 # а секреты в pull_request-workflow НЕ добавлять никогда.
 
 on:
@@ -72,7 +72,7 @@ jobs:
 
       - name: Install project
         # Если в репозитории появился lock-файл с хешами (см.
-        # security-audit/proposed/requirements/README-lock.md) — ставим строго по нему.
+        # requirements/README.md) — ставим строго по нему.
         # Пока его нет — устанавливаем проект, но без build-isolation (setuptools/wheel
         # уже закреплены выше, поэтому ничего не докачивается из PyPI в процессе сборки).
         run: |

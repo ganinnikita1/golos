@@ -2,7 +2,7 @@ version: 2
 
 # Обновления зависимостей: Dependabot открывает PR с новыми версиями.
 # Security-обновления (CVE) включаются не этим файлом, а настройкой репозитория
-# "Dependabot security updates" (см. github-hardening.ps1) + alerts.
+# "Dependabot security updates" (настройка репозитория) + alerts.
 #
 # PR-ы Dependabot запускают CI в контексте pull_request: GITHUB_TOKEN read-only,
 # секретов в workflow нет. Мерж — только через защищённый main.

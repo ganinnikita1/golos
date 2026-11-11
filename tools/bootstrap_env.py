@@ -58,7 +58,7 @@ def main() -> int:
         code = run(step)
         if code != 0:
             return code
-    run([PY, "-c", "import torch, transformers, sounddevice, onnxruntime, PySide6; print('OK', torch.__version__, transformers.__version__)"])
+    run([PY, "-c", "import torch, transformers, sounddevice, PySide6; print('OK', torch.__version__, transformers.__version__)"])
     return 0
 
 

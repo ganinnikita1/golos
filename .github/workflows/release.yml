@@ -1,21 +1,20 @@
 name: Release
 
-# ВЫПУСК: запускается ТОЛЬКО по push тега v* (теги создаёт владелец, см. ruleset-tags.json).
-# Отличие от CI: здесь есть write-права на создание Release, поэтому workflow
-# не должен запускаться на pull_request/pull_request_target ни при каких условиях.
+# ВЫПУСК: запускается ТОЛЬКО по push тега v* (теги создаёт владелец; ruleset-tags.json
+# запрещает перезапись/удаление тегов и создание кем угодно, кроме admin).
 #
-# Что делает:
-#   1) пересобирает проект из тега и прогоняет тесты (артефакт строится из проверенного кода);
-#   2) собирает portabe-zip PyInstaller и SHA256SUMS.txt;
-#   3) выпускает Sigstore-аттестацию (provenance) для zip и SUMS;
-#   4) создаёт GitHub Release, прикрепляя zip + SHA256SUMS.txt.
-# Бинарники остаются в Release, в git их не коммитим.
+# Порядок (best practice GitHub для immutable releases):
+#   1) собрать из тега и прогнать тесты;
+#   2) почистить __pycache__/dev-мусор из dist и проверить отсутствие путей сборочной машины;
+#   3) собрать portable-zip (flat top-level: Golos.exe + _internal) и source-zip (git archive);
+#   4) SHA256SUMS-<tag>.txt на оба архива + Sigstore-attestation;
+#   5) создать ЧЕРНОВИК релиза, приложить все ассеты, затем опубликовать
+#      (при включённой immutable releases GitHub дополнительно создаст release-attestation).
 #
-# ПРЕДУСЛОВИЯ (сделать один раз, до первого релиза):
-#   * включить "Immutable releases" (см. github-hardening.ps1);
-#   * включить Actions permission: contents: write только этому workflow (permissions ниже);
-#   * применить ruleset-tags.json, чтобы тег нельзя было переписать;
-#   * проверить этот workflow на тестовом теге (v0.1.1-rc1), не на боевом.
+# ПРЕДУСЛОВИЯ:
+#   * immutable releases включены (см. IMMUTABLE-RELEASES.md);
+#   * actions permissions: selected + sha_pinning_required (только GitHub-owned actions);
+#   * теги подписываются владельцем (SSH/GPG) — тогда шаг verify-tag станет обязательным.
 
 on:
   push:
@@ -31,9 +30,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 90
     permissions:
-      contents: write        # создать GitHub Release и приложить ассеты
-      id-token: write        # Sigstore OIDC для attest-build-provenance
-      attestations: write    # записать build provenance
+      contents: write        # GitHub Release
+      id-token: write        # Sigstore OIDC
+      attestations: write    # build provenance
     env:
       PYTHONUTF8: "1"
       PYTHONIOENCODING: utf-8
@@ -41,7 +40,7 @@ jobs:
 
     steps:
       - name: Checkout (tag, полная история)
-        # actions/checkout v4.4.0
+        # actions/checkout v4.4.0 — SHA сверен по API 2026-11-11
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           fetch-depth: 0
@@ -55,6 +54,20 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
 
+      - name: Проверка тега
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          git rev-parse --verify "refs/tags/$tag^{commit}" | Out-Null
+          # Подпись тега: если теги подписываются — этот шаг должен падать при bad signature.
+          # Пока теги неподписаны, ограничиваемся предупреждением.
+          $verify = git verify-tag $tag 2>&1
+          if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Тег $tag не подписан (git verify-tag: $verify). Подписывайте релизные теги."
+          } else {
+            Write-Host "Подпись тега $tag проверена." -ForegroundColor Green
+          }
+
       - name: Pin build tooling
         run: |
           python -m pip install --upgrade "pip==26.2.1" "setuptools==78.1.0" "wheel==0.45.1"
@@ -64,9 +77,9 @@ jobs:
           python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.8.0 torchaudio==2.8.0
 
       - name: Install project
-        # см. security-audit/proposed/requirements/README-lock.md
         run: |
           if (Test-Path "requirements/pypi.lock") {
+            python -m pip install --require-hashes -r "requirements/torch.lock"
             python -m pip install --require-hashes -r "requirements/pypi.lock"
             python -m pip install -e ".[dev]" --no-build-isolation --no-deps
           } else {
@@ -80,33 +93,65 @@ jobs:
         run: |
           powershell -NoProfile -ExecutionPolicy Bypass -File packaging\build.ps1
 
-      - name: Package + SHA256SUMS
+      - name: Clean dist (no __pycache__, no build-machine paths)
+        shell: pwsh
+        run: |
+          $dist = "dist\Golos"
+          Get-ChildItem -Path $dist -Recurse -Directory -Filter "__pycache__" -ErrorAction SilentlyContinue |
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          Get-ChildItem -Path $dist -Recurse -File -Include *.pyc -ErrorAction SilentlyContinue |
+            Remove-Item -Force -ErrorAction SilentlyContinue
+          # Защита от PII: в артефакт не должны попадать абсолютные пути сборочной машины.
+          $hits = Get-ChildItem -Path $dist -Recurse -File |
+            Select-String -Pattern 'C:\\Users\\' -SimpleMatch -List -ErrorAction SilentlyContinue
+          if ($hits) {
+            $hits | ForEach-Object { Write-Warning "build path in $($_.Path): $($_.Line)" }
+            throw "В dist найдены абсолютные пути C:\Users\ — сборка не годится для публикации."
+          }
+
+      - name: Package portable zip (flat) + source zip + SHA256SUMS
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
-          $zip = "dist\Golos-portable-$tag.zip"
-          Compress-Archive -Path "dist\Golos" -DestinationPath $zip -CompressionLevel Optimal
-          $hash = (Get-FileHash -Path $zip -Algorithm SHA256).Hash.ToLower()
-          "$hash *Golos-portable-$tag.zip" | Set-Content -Encoding ascii "dist\SHA256SUMS.txt"
-          Get-Content "dist\SHA256SUMS.txt"
+          $portable = "dist\Golos-portable-$tag.zip"
+          # ВАЖНО: "dist\Golos\*" — чтобы top-level был flat (Golos.exe + _internal),
+          # как в v0.1.1; "dist\Golos" добавил бы вложенную папку Golos\.
+          Compress-Archive -Path "dist\Golos\*" -DestinationPath $portable -CompressionLevel Optimal
+          git archive --format=zip --prefix="golos-$tag/" -o "dist\golos-$tag-source.zip" "v$tag"
+          $sums = "dist\SHA256SUMS-$tag.txt"
+          @(
+            (Get-FileHash -Path $portable -Algorithm SHA256).Hash.ToLower() + " *Golos-portable-$tag.zip",
+            (Get-FileHash -Path "dist\golos-$tag-source.zip" -Algorithm SHA256).Hash.ToLower() + " *golos-$tag-source.zip"
+          ) | Set-Content -Encoding ascii $sums
+          Get-Content $sums
 
       - name: Attest build provenance
-        # actions/attest-build-provenance v4.2.2, SHA сверен по API 2026-11-11
+        # actions/attest-build-provenance v4.2.2 — SHA сверен по API 2026-11-11
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             dist/Golos-portable-*.zip
-            dist/SHA256SUMS.txt
+            dist/golos-*-source.zip
+            dist/SHA256SUMS-*.txt
 
-      - name: Create GitHub Release
+      - name: Create DRAFT release (assets first)
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $tag = "${{ github.ref_name }}"
-          gh release create $tag `
+          gh release create $tag --draft `
             "dist/Golos-portable-$tag.zip" `
-            "dist/SHA256SUMS.txt" `
+            "dist/golos-$tag-source.zip" `
+            "dist/SHA256SUMS-$tag.txt" `
             --title "Голос $tag" `
             --generate-notes `
             --verify-tag
+
+      - name: Publish release (immutability applies here)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          gh release edit $tag --draft=false

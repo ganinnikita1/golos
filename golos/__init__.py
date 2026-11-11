@@ -11,6 +11,6 @@
     golos.pipeline — оркестрация: аудио → текст → полировка → вставка
 """
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 APP_NAME = "Golos"
 APP_TITLE = "«Голос» — диктовка для Windows"

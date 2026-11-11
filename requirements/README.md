@@ -39,12 +39,12 @@ git add requirements\pypi.in requirements\torch.in requirements\*.lock
 git commit -m "chore(deps): lock-файлы с хешами для воспроизводимой установки"
 ```
 
-Dependabot (см. `proposed/dependabot.yml`) будет обновлять pip-зависимости;
+Dependabot (`.github/dependabot.yml`) будет обновлять pip-зависимости;
 если он не умеет обновлять lock — перегенерируйте lock в том же PR.
 
 ## Шаг 3. Использовать в CI и установке
 
-CI/Release workflow (`proposed/ci.yml`, `proposed/release.yml`) уже умеют ставить
+CI/Release workflow (`.github/workflows/ci.yml`, `.github/workflows/release.yml`) уже умеют ставить
 из lock, если он есть:
 
 ```powershell
@@ -53,7 +53,7 @@ python -m pip install --require-hashes -r requirements\pypi.lock
 python -m pip install -e ".[dev]" --no-build-isolation --no-deps
 ```
 
-`bootstrap_env.py` — см. `proposed/bootstrap_env-hardening.diff` (та же схема,
+`bootstrap_env.py` (та же схема,
 с fallback на текущее поведение, пока lock-ов нет).
 
 ## Замечания
